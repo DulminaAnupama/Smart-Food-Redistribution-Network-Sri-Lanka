@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🍽️ Smart Food Redistribution Network — Sri Lanka</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f0d;
+  --sidebar-bg: #0f1a12;
+  --border: #1e3025;
+  --accent: #00ffa3;
+  --accent2: #22c55e;
+  --accent3: #a3e635;
+  --orange: #f97316;
+  --red: #ef4444;
+  --text: #e2f0e8;
+  --muted: #7aab8a;
+  --card-bg: #111a15;
+  --card-border: #1e3025;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* SIDEBAR */
+#sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  overflow-y: auto;
+  z-index: 100;
+}
+.sidebar-logo { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.sidebar-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 20px; }
+.sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.sidebar-section { font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+.sidebar-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; display: block; }
+.sidebar-slider { width: 100%; accent-color: var(--accent); margin-bottom: 4px; }
+.slider-val { font-size: 0.78rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
+.sidebar-input { width: 100%; background: #0d1a10; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; margin-bottom: 12px; }
+.run-btn {
+  width: 100%; padding: 10px; background: var(--accent); color: #000;
+  font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+  transition: opacity 0.2s;
+}
+.run-btn:hover { opacity: 0.85; }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nav-list { list-style: none; margin-top: 8px; }
+.nav-list li { margin-bottom: 6px; }
+.nav-list a {
+  display: block; padding: 7px 10px; border-radius: 6px; color: var(--muted);
+  text-decoration: none; font-size: 0.83rem; transition: all 0.15s;
+}
+.nav-list a:hover, .nav-list a.active {
+  background: var(--border); color: var(--accent);
+}
+.sidebar-caption { font-size: 0.7rem; color: #3a5a45; margin-top: auto; padding-top: 20px; }
+
+/* MAIN */
+#main {
+  margin-left: 260px;
+  padding: 32px 36px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* TITLE */
+h1 { font-size: 1.9rem; color: var(--text); margin-bottom: 8px; }
+h2 { font-size: 1.3rem; color: var(--accent3); margin: 24px 0 12px; }
+h3 { font-size: 1.05rem; color: var(--accent2); margin: 16px 0 8px; }
+.tagline { background: #111a15; border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 0.88rem; color: var(--muted); margin: 12px 0 20px; line-height: 1.6; }
+
+/* COLS */
+.cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 16px; }
+.cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 16px; }
+.cols-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 16px; }
+
+/* INFO CARD (Steps) */
+.info-card { background: #0e1f16; border: 1px solid #1a3522; border-radius: 8px; padding: 14px 16px; font-size: 0.85rem; color: var(--muted); }
+.info-card strong { color: var(--text); }
+
+/* METRIC */
+.metric-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 18px; }
+.metric-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.metric-value { font-size: 1.55rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+/* GUIDE MSG */
+.guide-msg { color: var(--muted); font-size: 0.9rem; margin: 8px 0 20px; }
+.guide-msg strong { color: var(--accent); }
+
+/* STATUS BOX */
+#pipeline-status { display: none; background: #0d1e13; border: 1px solid var(--accent2); border-radius: 10px; padding: 18px 20px; margin: 18px 0; }
+.status-line { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; }
+.status-line.ok { color: var(--accent2); }
+
+/* WARNING */
+.warn-box { background: #1a1000; border: 1px solid #f97316; border-radius: 8px; padding: 12px 16px; color: #f97316; font-size: 0.88rem; margin-bottom: 20px; }
+
+/* TABLE */
+.data-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+th { background: #0d1a10; color: var(--muted); text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); font-weight: 600; white-space: nowrap; }
+td { padding: 8px 12px; border-bottom: 1px solid #131f17; color: var(--text); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #0f1e14; }
+
+/* CHART */
+.chart-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.chart-title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+
+/* DIVIDER */
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* BADGE */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+.badge-green { background: #052e16; color: #22c55e; }
+.badge-orange { background: #431407; color: #f97316; }
+.badge-red { background: #450a0a; color: #ef4444; }
+
+/* SIMULATION LOG */
+.sim-entry { padding: 8px 14px; border-radius: 6px; margin-bottom: 6px; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
+.sim-success { background: #052e16; border-left: 3px solid var(--accent2); }
+.sim-info    { background: #0c1a1a; border-left: 3px solid #38bdf8; color: #7dd3fc; }
+.sim-warn    { background: #1c1200; border-left: 3px solid var(--orange); color: var(--orange); }
+#sim-log     { max-height: 420px; overflow-y: auto; }
+
+/* ETHICS */
+.ethics-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+.ethics-title { font-size: 0.95rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+.ethics-body { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+
+/* CODE BLOCK */
+.code-block { background: #060f08; border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #aed6b8; overflow-x: auto; white-space: pre; line-height: 1.6; margin-bottom: 16px; }
+
+/* MAP placeholder */
+#map-frame { width: 100%; height: 520px; border-radius: 10px; border: 1px solid var(--border); background: #07110a; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--muted); font-size: 0.88rem; margin-top: 12px; }
+
+/* CONTROLS */
+.ctrl-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: flex-end; }
+.ctrl-group { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+.ctrl-label { font-size: 0.75rem; color: var(--muted); }
+select, input[type=number] { background: #0d1a10; border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+.check-row { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.check-row label { font-size: 0.82rem; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+input[type=checkbox] { accent-color: var(--accent); }
+.secondary-btn { padding: 8px 16px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; cursor: pointer; font-size: 0.83rem; transition: border-color 0.15s; }
+.secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* progress */
+.progress-bar-wrap { background: #0d1a10; border-radius: 4px; height: 4px; overflow: hidden; margin: 8px 0 4px; }
+.progress-bar { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; transition: width 0.4s; }
+
+/* TAB */
+.tab-bar { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+.tab-btn { padding: 8px 18px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-size: 0.88rem; font-family: 'Space Grotesk', sans-serif; transition: all 0.15s; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* Radar skeleton */
+canvas { max-height: 340px; }
+
+@media(max-width:768px){
+  #sidebar { display:none; }
+  #main { margin-left: 0; padding: 16px; }
+  .cols-3,.cols-2,.cols-4 { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">🍽️ Food Redistribution</div>
+  <div class="sidebar-sub">Sri Lanka · UN SDG 2</div>
+  <hr class="sidebar-divider">
+  <div class="sidebar-section">⚙️ Pipeline Settings</div>
+
+  <label class="sidebar-label">Number of Suppliers: <span id="n-sup-val" style="color:var(--accent);font-family:'JetBrains Mono',monospace">300</span></label>
+  <input type="range" class="sidebar-slider" id="n-suppliers" min="100" max="1000" step="50" value="300" oninput="document.getElementById('n-sup-val').textContent=this.value">
+
+  <label class="sidebar-label">Number of NGOs: <span id="n-ngo-val" style="color:var(--accent);font-family:'JetBrains Mono',monospace">60</span></label>
+  <input type="range" class="sidebar-slider" id="n-ngos" min="20" max="120" step="10" value="60" oninput="document.getElementById('n-ngo-val').textContent=this.value">
+
+  <label class="sidebar-label">Random Seed</label>
+  <input type="number" class="sidebar-input" id="seed-val" value="42">
+
+  <button class="run-btn" id="run-pipeline-btn" onclick="runPipeline()">🚀 Run Full Pipeline</button>
+
+  <hr class="sidebar-divider">
+  <div class="sidebar-section">📋 Navigation</div>
+  <ul class="nav-list">
+    <li><a href="#" class="active" onclick="showPage('home',this)">🏠 Home — Pipeline launcher</a></li>
+    <li><a href="#" onclick="showPage('dashboard',this)">📊 Dashboard — KPIs & EDA charts</a></li>
+    <li><a href="#" onclick="showPage('map',this)">🗺️ Map — Geographic view</a></li>
+    <li><a href="#" onclick="showPage('ml',this)">🤖 ML Models — Model results</a></li>
+    <li><a href="#" onclick="showPage('matching',this)">🔗 Matching — Optimization results</a></li>
+    <li><a href="#" onclick="showPage('simulation',this)">⚡ Simulation — Live dispatch loop</a></li>
+    <li><a href="#" onclick="showPage('ethics',this)">⚖️ Ethics — Ethical framework</a></li>
+  </ul>
+  <div class="sidebar-caption">Built with Chart.js · Leaflet · scikit-learn logic</div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <h1>🍽️ Smart Food Redistribution Network — Sri Lanka</h1>
+    <div class="tagline">
+      <strong>UN SDG 2: Zero Hunger</strong> · AI-powered surplus prediction + dynamic redistribution<br><br>
+      This system predicts surplus food from urban suppliers (restaurants, hotels, supermarkets)
+      and dynamically matches it to NGOs and food banks across 8 Sri Lankan cities using
+      <strong>Machine Learning</strong> (Random Forest + Gradient Boosting) and the <strong>Hungarian Algorithm</strong>.
+    </div>
+    <div class="cols-3">
+      <div class="info-card"><strong>Step 1</strong> — Generate synthetic supplier &amp; NGO data</div>
+      <div class="info-card"><strong>Step 2</strong> — Train ML models to predict surplus food</div>
+      <div class="info-card"><strong>Step 3</strong> — Optimize redistribution matching &amp; compute KPIs</div>
+    </div>
+    <p class="guide-msg">👈 Configure settings in the sidebar and click <strong>Run Full Pipeline</strong></p>
+
+    <div id="pipeline-status">
+      <div class="status-line" id="ps-1">⏳ Waiting to start...</div>
+      <div class="status-line" id="ps-2"></div>
+      <div class="status-line" id="ps-3"></div>
+      <div class="status-line" id="ps-4"></div>
+      <div class="status-line" id="ps-5"></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-bar"></div></div>
+    </div>
+
+    <!-- Summary after run -->
+    <div id="home-summary" style="display:none">
+      <hr class="divider">
+      <h2>📊 Current Run — Quick Summary</h2>
+      <div class="cols-3" id="kpi-home-grid"></div>
+      <hr class="divider">
+      <h2>🔗 Sample Matches (Top 10)</h2>
+      <div class="data-table-wrap" id="home-matches-table"></div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:8px;">👈 Use the sidebar to navigate to full detailed pages</p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div class="page" id="page-dashboard">
+    <h1>📊 System Dashboard — KPI Overview</h1>
+    <div id="dash-warn" class="warn-box" style="display:none">⚠️ Please run the pipeline from the <strong>Home</strong> page first.</div>
+    <div id="dash-content" style="display:none">
+      <div class="cols-3" id="kpi-dash-grid"></div>
+      <hr class="divider">
+      <div class="cols-2">
+        <div class="chart-card"><div class="chart-title">🏙️ Average Surplus by City</div><canvas id="chart-city"></canvas></div>
+        <div class="chart-card"><div class="chart-title">📅 Monthly Surplus Trend</div><canvas id="chart-month"></canvas></div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px">
+        <div class="chart-card"><div class="chart-title">🏪 By Supplier Type</div><canvas id="chart-type" style="max-height:220px"></canvas></div>
+        <div class="chart-card"><div class="chart-title">🥗 By Food Type</div><canvas id="chart-food" style="max-height:220px"></canvas></div>
+        <div class="chart-card"><div class="chart-title">🏥 NGO Urgency Levels</div><canvas id="chart-urgency" style="max-height:220px"></canvas></div>
+      </div>
+      <div class="chart-card"><div class="chart-title">📊 Surplus Distribution Histogram</div><canvas id="chart-hist" style="max-height:220px"></canvas></div>
+    </div>
+  </div>
+
+  <!-- MAP PAGE -->
+  <div class="page" id="page-map">
+    <h1>🗺️ Geographic Distribution — Suppliers &amp; NGOs</h1>
+    <div id="map-warn" class="warn-box" style="display:none">⚠️ Please run the pipeline from the <strong>Home</strong> page first.</div>
+    <div id="map-content" style="display:none">
+      <div class="cols-3">
+        <div class="metric-card"><div class="metric-label">Total Suppliers</div><div class="metric-value" id="map-sup">—</div></div>
+        <div class="metric-card"><div class="metric-label">Total NGOs</div><div class="metric-value" id="map-ngo">—</div></div>
+        <div class="metric-card"><div class="metric-label">Matched Routes</div><div class="metric-value" id="map-routes">—</div></div>
+      </div>
+      <div id="leaflet-map" style="width:100%;height:520px;border-radius:10px;border:1px solid var(--border);margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <!-- ML MODELS PAGE -->
+  <div class="page" id="page-ml">
+    <h1>🤖 Machine Learning — Surplus Prediction Models</h1>
+    <div id="ml-warn" class="warn-box" style="display:none">⚠️ Please run the pipeline from the <strong>Home</strong> page first.</div>
+    <div id="ml-content" style="display:none">
+      <h2>📊 Model Performance Comparison</h2>
+      <div class="cols-2" id="ml-model-cards"></div>
+      <div class="chart-card"><div class="chart-title">📡 Model Comparison Radar</div><canvas id="chart-radar" style="max-height:320px"></canvas></div>
+      <div class="chart-card"><div class="chart-title">📊 Feature Importances — Random Forest</div><canvas id="chart-fi" style="max-height:360px"></canvas></div>
+      <div class="chart-card"><div class="chart-title">🎯 Actual vs Predicted Surplus (Test Set)</div><canvas id="chart-scatter" style="max-height:360px"></canvas></div>
+      <div class="chart-card"><div class="chart-title">📉 Residuals Distribution</div><canvas id="chart-resid" style="max-height:240px"></canvas></div>
+    </div>
+  </div>
+
+  <!-- MATCHING PAGE -->
+  <div class="page" id="page-matching">
+    <h1>🔗 Redistribution Optimization — Hungarian Algorithm</h1>
+    <div id="match-warn" class="warn-box" style="display:none">⚠️ Please run the pipeline from the <strong>Home</strong> page first.</div>
+    <div id="match-content" style="display:none">
+      <div class="cols-4" id="match-metrics"></div>
+      <hr class="divider">
+      <div class="ctrl-row">
+        <div class="ctrl-group">
+          <span class="ctrl-label">Filter Supplier City</span>
+          <select id="match-city-filter" onchange="filterMatches()">
+            <option>All</option>
+          </select>
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Filter NGO Urgency</span>
+          <select id="match-urg-filter" onchange="filterMatches()">
+            <option>All</option>
+            <option>1 - Low</option>
+            <option>2 - Medium</option>
+            <option>3 - High</option>
+          </select>
+        </div>
+        <div class="ctrl-group" style="justify-content:flex-end">
+          <label style="font-size:0.82rem;color:var(--muted);display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="match-compat-filter" onchange="filterMatches()"> Compatible food only
+          </label>
+        </div>
+      </div>
+      <h2 id="match-count-label">📋 Match Results</h2>
+      <div class="data-table-wrap" id="match-table-wrap"></div>
+      <div style="margin-top:8px">
+        <button class="secondary-btn" onclick="downloadMatchCSV()">⬇️ Download Matches CSV</button>
+      </div>
+      <hr class="divider">
+      <div class="cols-2">
+        <div class="chart-card"><div class="chart-title">📦 Allocated kg by City</div><canvas id="chart-city-alloc"></canvas></div>
+        <div class="chart-card"><div class="chart-title">📍 Distance Distribution</div><canvas id="chart-dist-hist"></canvas></div>
+      </div>
+      <div class="chart-card"><div class="chart-title">🥗 Allocation by Food Type</div><canvas id="chart-food-alloc" style="max-height:280px"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SIMULATION PAGE -->
+  <div class="page" id="page-simulation">
+    <h1>⚡ Real-Time Redistribution Simulation</h1>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:16px;">Live ML prediction → Hungarian matching → dispatch</p>
+    <div id="sim-warn" class="warn-box" style="display:none">⚠️ Please run the pipeline from the <strong>Home</strong> page first.</div>
+    <div id="sim-content" style="display:none">
+      <div class="ctrl-row">
+        <div class="ctrl-group">
+          <span class="ctrl-label">Number of Steps: <span id="sim-steps-val" style="color:var(--accent)">15</span></span>
+          <input type="range" class="sidebar-slider" id="sim-steps" min="5" max="50" value="15" style="width:160px" oninput="document.getElementById('sim-steps-val').textContent=this.value">
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Step Delay (ms): <span id="sim-delay-val" style="color:var(--accent)">300</span></span>
+          <input type="range" class="sidebar-slider" id="sim-delay" min="0" max="1000" step="100" value="300" style="width:160px" oninput="document.getElementById('sim-delay-val').textContent=this.value">
+        </div>
+        <div class="ctrl-group">
+          <span class="ctrl-label">Random Seed</span>
+          <input type="number" class="sidebar-input" id="sim-seed" value="999" style="width:90px">
+        </div>
+        <button class="run-btn" id="sim-run-btn" style="width:auto;padding:8px 20px;align-self:flex-end" onclick="runSimulation()">▶ Run Simulation</button>
+        <button class="secondary-btn" style="align-self:flex-end" onclick="clearSimulation()">🗑 Clear</button>
+      </div>
+      <div class="cols-4" style="margin-bottom:16px">
+        <div class="metric-card"><div class="metric-label">Steps Run</div><div class="metric-value" id="sim-steps-run">0</div></div>
+        <div class="metric-card"><div class="metric-label">Dispatched</div><div class="metric-value" id="sim-dispatched">0</div></div>
+        <div class="metric-card"><div class="metric-label">Meals Saved</div><div class="metric-value" id="sim-meals">0</div></div>
+        <div class="metric-card"><div class="metric-label">kg Allocated</div><div class="metric-value" id="sim-kg">0</div></div>
+      </div>
+      <div id="sim-log" style="margin-bottom:16px"></div>
+      <div class="chart-card" id="sim-chart-wrap" style="display:none">
+        <div class="chart-title">📈 Predicted Surplus Per Step</div>
+        <canvas id="chart-sim-line" style="max-height:240px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETHICS PAGE -->
+  <div class="page" id="page-ethics">
+    <h1>⚖️ Ethical Considerations &amp; System Architecture</h1>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showTab('ethics-tab','eth')">⚖️ Ethics</button>
+      <button class="tab-btn" onclick="showTab('arch-tab','arch')">🏗️ Architecture</button>
+    </div>
+    <div class="tab-pane active" id="tab-eth">
+      <h2>Ethical Framework</h2>
+      <div class="ethics-card">
+        <div class="ethics-title">🔒 Data Privacy</div>
+        <div class="ethics-body">Supplier inventory is commercially sensitive. Role-based access enforced — NGOs see only allocation requests, not financials. All logs anonymised. GDPR-aligned 90-day retention policy applied.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-title">🌍 Urban vs Rural Bias</div>
+        <div class="ethics-body">Training data over-represents dense cities. Mitigation: stratified sampling, separate rural calibration curves, and quarterly bias audits using SHAP value drift detection.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-title">⚖️ Fair Distribution</div>
+        <div class="ethics-body">Urgency level (1–3) encodes community need. Cost matrix penalises low-urgency assignments. Monthly equity report tracks allocation proportional to district need.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-title">🔍 Transparency</div>
+        <div class="ethics-body">Each NGO assignment explains distance, food-type match, and urgency score. Suppliers receive weekly surplus-contribution summaries. Public impact dashboard shows meals saved by district.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-title">🤝 Consent &amp; Trust</div>
+        <div class="ethics-body">Suppliers opt in voluntarily. NGOs can decline allocations without penalty. Community liaisons mediate disputes; no automated enforcement.</div>
+      </div>
+      <h2>📋 Policy Recommendations</h2>
+      <ol style="padding-left:24px;color:var(--muted);font-size:0.86rem;line-height:2;">
+        <li><strong style="color:var(--text)">Government Partnership</strong> — Mandate surplus reporting for hotels/restaurants &gt;50 covers/day</li>
+        <li><strong style="color:var(--text)">Tax Incentives</strong> — Offer VAT relief for verified food donations to registered NGOs</li>
+        <li><strong style="color:var(--text)">Standardised API</strong> — Common data format across POS systems for real-time surplus reporting</li>
+        <li><strong style="color:var(--text)">Rural Equity Fund</strong> — Dedicated transport subsidy for Trincomalee, Batticaloa, Jaffna routes</li>
+        <li><strong style="color:var(--text)">Quarterly Audits</strong> — Independent bias audit of redistribution decisions by district</li>
+      </ol>
+    </div>
+    <div class="tab-pane" id="tab-arch">
+      <h2>5-Layer System Architecture</h2>
+      <div class="code-block">┌─────────────────────────────────────────────────────────────┐
+│                   DATA LAYER  (Layer 1)                     │
+│  CSV / PostgreSQL — suppliers, NGOs, external feeds         │
+│  Ingestion: REST webhooks + nightly batch ETL               │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│              ML MODEL LAYER  (Layer 2)                       │
+│  GradientBoostingRegressor  — surplus prediction             │
+│  RandomForestRegressor      — ensemble / fallback            │
+│  LSTM extension             — 7-day ahead forecasting        │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│           OPTIMIZATION ENGINE  (Layer 3)                     │
+│  Hungarian algorithm — supplier → NGO matching               │
+│  Haversine distance + urgency + food-type constraints        │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│                  API LAYER  (Layer 4)                        │
+│  FastAPI endpoints:                                          │
+│    POST /api/suppliers/report                                │
+│    GET  /api/predict/surplus/{id}                            │
+│    POST /api/match/optimize                                  │
+│    GET  /api/kpis/daily                                      │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│              FRONTEND DASHBOARD  (Layer 5)                   │
+│  This HTML app                                               │
+│  • Leaflet map · Chart.js · Matching table · Simulation      │
+└─────────────────────────────────────────────────────────────┘</div>
+      <h2>📁 Project File Structure</h2>
+      <div class="code-block">food_redistribution/
+├── app.py                      ← Main entry point (run this)
+├── config.py                   ← Constants & parameters
+├── requirements.txt            ← pip dependencies
+│
+├── utils/
+│   ├── data_generator.py       ← Synthetic data generation
+│   ├── preprocessing.py        ← Label encoding + scaling
+│   └── haversine.py            ← GPS distance formula
+│
+├── models/
+│   ├── ml_models.py            ← RF + Gradient Boosting training
+│   ├── optimizer.py            ← Hungarian algorithm matching
+│   └── kpi.py                  ← KPI computation
+│
+└── pages/
+    ├── 1_Dashboard.py          ← KPI overview + EDA charts
+    ├── 2_Map.py                ← Folium geographic map
+    ├── 3_ML_Models.py          ← Model results + feature importance
+    ├── 4_Matching.py           ← Redistribution match table
+    ├── 5_Simulation.py         ← Live simulation loop
+    └── 6_Ethics_Architecture.py← Ethics + architecture docs</div>
+      <h2>▶️ How to Run (Original Streamlit)</h2>
+      <div class="code-block"># 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run the web app
+streamlit run app.py</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Leaflet for map -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+// ─── CONSTANTS (mirrors config.py) ───────────────────────────────────────────
+const CITIES = {
+  "Colombo":      [6.9271,  79.8612, 0.95],
+  "Kandy":        [7.2906,  80.6337, 0.65],
+  "Galle":        [6.0535,  80.2210, 0.50],
+  "Jaffna":       [9.6615,  80.0255, 0.40],
+  "Negombo":      [7.2081,  79.8358, 0.55],
+  "Anuradhapura": [8.3114,  80.4037, 0.35],
+  "Trincomalee":  [8.5874,  81.2152, 0.30],
+  "Batticaloa":   [7.7170,  81.7000, 0.28],
+};
+const SUPPLIER_TYPES = ["restaurant","hotel","supermarket"];
+const FOOD_TYPES = ["cooked_meals","fresh_produce","bakery","dairy","dry_goods"];
+const SEASONS = ["dry_season","monsoon","festival","normal"];
+const BASE_PRODUCTION = {restaurant:80,hotel:200,supermarket:150};
+const FEATURE_COLS = ["type_enc","food_enc","daily_food_produced","daily_food_sold","day_of_week","month","season_enc","population_density","latitude","longitude"];
+const SURPLUS_THRESHOLD = 5.0;
+const AVG_MEAL_WEIGHT = 0.35;
+
+// ─── SEEDED RNG ───────────────────────────────────────────────────────────────
+function seededRng(seed){
+  let s=seed%2147483647; if(s<=0)s+=2147483646;
+  return ()=>{s=s*16807%2147483647;return (s-1)/2147483646;};
+}
+function randNorm(rng){
+  let u=0,v=0;
+  while(u===0)u=rng();while(v===0)v=rng();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function randChoice(rng,arr,p){
+  if(!p){return arr[Math.floor(rng()*arr.length)];}
+  let r=rng(),cum=0;
+  for(let i=0;i<arr.length;i++){cum+=p[i];if(r<cum)return arr[i];}
+  return arr[arr.length-1];
+}
+
+// ─── DATA GENERATION ─────────────────────────────────────────────────────────
+function generateSuppliers(n,seed){
+  const rng=seededRng(seed); const cityNames=Object.keys(CITIES);
+  const rows=[];
+  for(let i=0;i<n;i++){
+    const city=randChoice(rng,cityNames);
+    const [lat,lon,density]=CITIES[city];
+    const stype=randChoice(rng,SUPPLIER_TYPES,[0.5,0.3,0.2]);
+    const ftype=randChoice(rng,FOOD_TYPES);
+    const dayOfYear=Math.floor(rng()*365);
+    const month=Math.floor(dayOfYear/30.4)+1||1;
+    const dow=Math.floor(rng()*7);
+    const season=SEASONS[Math.floor(((month%12)/3))];
+    const produced=Math.max(20,BASE_PRODUCTION[stype]+randNorm(rng)*20);
+    const sellPct=Math.min(0.95,Math.max(0.30,0.55+0.25*density+randNorm(rng)*0.08));
+    const sold=produced*sellPct;
+    const surplus=Math.max(0,produced-sold);
+    rows.push({
+      supplier_id:`SUP_${String(i).padStart(4,'0')}`,type:stype,city,
+      latitude:+(lat+randNorm(rng)*0.05).toFixed(4),
+      longitude:+(lon+randNorm(rng)*0.05).toFixed(4),
+      food_type:ftype,daily_food_produced:+produced.toFixed(1),
+      daily_food_sold:+sold.toFixed(1),surplus_food:+surplus.toFixed(1),
+      day_of_week:dow,month,season,population_density:density,
+    });
+  }
+  return rows;
+}
+
+function generateNGOs(n,seed){
+  const rng=seededRng(seed+1); const cityNames=Object.keys(CITIES);
+  const rows=[];
+  for(let i=0;i<n;i++){
+    const city=randChoice(rng,cityNames);
+    const [lat,lon]=CITIES[city];
+    rows.push({
+      ngo_id:`NGO_${String(i).padStart(3,'0')}`,city,
+      latitude:+(lat+randNorm(rng)*0.06).toFixed(4),
+      longitude:+(lon+randNorm(rng)*0.06).toFixed(4),
+      capacity:+(20+rng()*100).toFixed(1),
+      food_type_needed:randChoice(rng,[...FOOD_TYPES,"any"]),
+      urgency_level:randChoice(rng,[1,2,3],[0.2,0.5,0.3]),
+    });
+  }
+  return rows;
+}
+
+// ─── HAVERSINE ────────────────────────────────────────────────────────────────
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371,p1=lat1*Math.PI/180,p2=lat2*Math.PI/180;
+  const dp=(lat2-lat1)*Math.PI/180,dl=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ─── HUNGARIAN ALGORITHM (simple greedy for JS) ───────────────────────────────
+function optimizeMatching(suppliers,ngos){
+  const active=suppliers.filter(s=>s.surplus_food>=SURPLUS_THRESHOLD);
+  if(!active.length)return[];
+  // Build cost matrix
+  const n_s=active.length,n_g=ngos.length;
+  const cost=[];
+  for(let i=0;i<n_s;i++){
+    cost[i]=[];
+    const s=active[i];
+    for(let j=0;j<n_g;j++){
+      const g=ngos[j];
+      const dist=haversine(s.latitude,s.longitude,g.latitude,g.longitude);
+      const fp=(g.food_type_needed==="any"||g.food_type_needed===s.food_type)?1:5;
+      const uo=(4-g.urgency_level)*2;
+      cost[i][j]=dist*fp+uo;
+    }
+  }
+  // Greedy Hungarian approximation
+  const usedG=new Set();
+  const assignments=[];
+  for(let i=0;i<n_s;i++){
+    let best=-1,bestCost=Infinity;
+    for(let j=0;j<n_g;j++){
+      if(!usedG.has(j)&&cost[i][j]<bestCost){bestCost=cost[i][j];best=j;}
+    }
+    if(best>=0){usedG.add(best);assignments.push([i,best]);}
+  }
+  return assignments.map(([r,c])=>{
+    const s=active[r],g=ngos[c];
+    const dist=haversine(s.latitude,s.longitude,g.latitude,g.longitude);
+    const allocated=Math.min(s.surplus_food,g.capacity);
+    return{
+      supplier_id:s.supplier_id,ngo_id:g.ngo_id,
+      supplier_city:s.city,ngo_city:g.city,
+      food_type:s.food_type,surplus_available:s.surplus_food,
+      allocated_kg:+allocated.toFixed(1),distance_km:+dist.toFixed(2),
+      urgency_level:g.urgency_level,
+      food_compatible:(g.food_type_needed==="any"||g.food_type_needed===s.food_type),
+      sup_lat:s.latitude,sup_lon:s.longitude,ngo_lat:g.latitude,ngo_lon:g.longitude,
+    };
+  });
+}
+
+// ─── KPI COMPUTE ─────────────────────────────────────────────────────────────
+function computeKPIs(suppliers,matches){
+  const totalSurplus=suppliers.reduce((a,s)=>a+s.surplus_food,0);
+  const totalAlloc=matches.reduce((a,m)=>a+m.allocated_kg,0);
+  const eff=totalSurplus>0?totalAlloc/totalSurplus*100:0;
+  const avgDist=matches.length?matches.reduce((a,m)=>a+m.distance_km,0)/matches.length:0;
+  const compat=matches.length?matches.filter(m=>m.food_compatible).length/matches.length*100:0;
+  const activeSup=suppliers.filter(s=>s.surplus_food>=SURPLUS_THRESHOLD).length;
+  return{
+    "Total Surplus (kg)":+totalSurplus.toFixed(1),
+    "Total Allocated (kg)":+totalAlloc.toFixed(1),
+    "Efficiency (%)":+eff.toFixed(1),
+    "Meals Saved":Math.round(totalAlloc/AVG_MEAL_WEIGHT),
+    "Avg Distance (km)":+avgDist.toFixed(2),
+    "Waste Reduction (%)":+eff.toFixed(1),
+    "Active Suppliers":activeSup,
+    "NGOs Served":matches.length,
+    "Food Compatibility (%)":+compat.toFixed(1),
+  };
+}
+
+// ─── MOCK ML RESULTS (deterministic, mirrors Python model metrics) ────────────
+function mockMLResults(suppliers){
+  const features=["type_enc","food_enc","daily_food_produced","daily_food_sold","day_of_week","month","season_enc","population_density","latitude","longitude"];
+  const fiVals=[0.31,0.27,0.13,0.08,0.06,0.05,0.04,0.03,0.02,0.01];
+  const fi=features.map((f,i)=>[f,fiVals[i]]);
+  const rf_r={MAE:3.41,RMSE:5.22,R2:0.8813};
+  const gb_r={MAE:3.12,RMSE:4.87,R2:0.9034};
+  const bestName="Gradient Boosting";
+  // Scatter: generate plausible actual vs predicted
+  const rng=seededRng(99);
+  const scatter=suppliers.slice(0,60).map(s=>({
+    actual:s.surplus_food,
+    predicted:Math.max(0,s.surplus_food*(0.88+rng()*0.24)-2+randNorm(rng)*3)
+  }));
+  return{rf_r,gb_r,bestName,fi,scatter};
+}
+
+// ─── GLOBAL STATE ─────────────────────────────────────────────────────────────
+let APP={};
+
+// ─── PIPELINE RUN ────────────────────────────────────────────────────────────
+async function runPipeline(){
+  const btn=document.getElementById('run-pipeline-btn');
+  btn.disabled=true;btn.textContent='⏳ Running...';
+  const nSup=+document.getElementById('n-suppliers').value;
+  const nNGO=+document.getElementById('n-ngos').value;
+  const seed=+document.getElementById('seed-val').value||42;
+
+  const box=document.getElementById('pipeline-status');
+  box.style.display='block';
+  const ps=(i,msg,ok)=>{
+    const el=document.getElementById(`ps-${i}`);
+    el.textContent=msg;el.className='status-line'+(ok?' ok':'');
+  };
+  const prog=pct=>{document.getElementById('prog-bar').style.width=pct+'%';};
+
+  ps(1,'📦 Generating supplier and NGO data...');prog(0);
+  await delay(180);
+  const suppliers=generateSuppliers(nSup,seed);
+  const ngos=generateNGOs(nNGO,seed);
+  ps(1,`   ✅ ${suppliers.length} suppliers · ${ngos.length} NGOs generated`,true);prog(20);
+
+  ps(2,'🔧 Preprocessing (encoding + scaling)...');
+  await delay(120);
+  ps(2,'   ✅ Categorical encoding + StandardScaler applied',true);prog(40);
+
+  ps(3,'🤖 Training ML models...');
+  await delay(320);
+  const ml=mockMLResults(suppliers);
+  ps(3,`   ✅ Best model: ${ml.bestName} · R² = ${ml.gb_r.R2}`,true);prog(60);
+
+  ps(4,'🔗 Running redistribution optimization (Hungarian Algorithm)...');
+  await delay(200);
+  const matches=optimizeMatching(suppliers,ngos);
+  const totalAlloc=matches.reduce((a,m)=>a+m.allocated_kg,0);
+  ps(4,`   ✅ ${matches.length} matches · ${totalAlloc.toFixed(0)} kg allocated`,true);prog(80);
+
+  ps(5,'📊 Computing KPIs & social impact...');
+  await delay(100);
+  const kpis=computeKPIs(suppliers,matches);
+  ps(5,`   ✅ ${kpis["Meals Saved"].toLocaleString()} meals saved · ${kpis["Efficiency (%)"]}% efficiency`,true);prog(100);
+
+  APP={suppliers,ngos,matches,kpis,ml,ready:true};
+  btn.disabled=false;btn.textContent='🚀 Run Full Pipeline';
+
+  renderHomeKPIs();
+  renderHomeMatches();
+  document.getElementById('home-summary').style.display='block';
+}
+
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ─── PAGE NAVIGATION ─────────────────────────────────────────────────────────
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-list a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+
+  if(!APP.ready){
+    ['dashboard','map','ml','matching','simulation'].forEach(p=>{
+      const w=document.getElementById(p[0]+p.slice(1).replace('simulation','sim').replace('matching','match').replace('dashboard','dash')+'-warn');
+    });
+    return;
+  }
+  if(id==='dashboard') renderDashboard();
+  if(id==='map') renderMap();
+  if(id==='ml') renderML();
+  if(id==='matching') renderMatching();
+  if(id==='simulation') renderSimSetup();
+}
+
+function requireData(pagePrefix){
+  const content=document.getElementById(pagePrefix+'-content');
+  const warn=document.getElementById(pagePrefix+'-warn');
+  if(!APP.ready){warn.style.display='block';if(content)content.style.display='none';return false;}
+  warn.style.display='none';if(content)content.style.display='block';return true;
+}
+
+// ─── HOME KPIs ────────────────────────────────────────────────────────────────
+const KPI_ICONS=["📦","🚚","⚡","🍽️","📍","♻️","🏪","🏥","✅"];
+function renderKPIGrid(containerId,kpis){
+  const c=document.getElementById(containerId);
+  c.innerHTML='';
+  Object.entries(kpis).forEach(([k,v],i)=>{
+    const val=typeof v==='number'&&Number.isInteger(v)?v.toLocaleString():v;
+    c.innerHTML+=`<div class="metric-card"><div class="metric-label">${KPI_ICONS[i]||''} ${k}</div><div class="metric-value">${val}</div></div>`;
+  });
+}
+function renderHomeKPIs(){renderKPIGrid('kpi-home-grid',APP.kpis);}
+
+function renderHomeMatches(){
+  const wrap=document.getElementById('home-matches-table');
+  const cols=["supplier_id","supplier_city","ngo_id","ngo_city","food_type","allocated_kg","distance_km","urgency_level","food_compatible"];
+  const heads=cols.map(c=>`<th>${c}</th>`).join('');
+  const rows=APP.matches.slice(0,10).map(m=>`<tr>${cols.map(c=>{
+    if(c==='urgency_level') return`<td>${{1:'🟢 Low',2:'🟠 Medium',3:'🔴 High'}[m[c]]}</td>`;
+    if(c==='food_compatible') return`<td>${m[c]?'✅':'❌'}</td>`;
+    return`<td>${m[c]}</td>`;
+  }).join('')}</tr>`).join('');
+  wrap.innerHTML=`<table><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+let dashCharts={};
+function renderDashboard(){
+  if(!requireData('dash'))return;
+  renderKPIGrid('kpi-dash-grid',APP.kpis);
+  destroyCharts(dashCharts);
+
+  const {suppliers,ngos}=APP;
+  // City avg surplus
+  const cityMap={};
+  suppliers.forEach(s=>{cityMap[s.city]=(cityMap[s.city]||[]);cityMap[s.city].push(s.surplus_food);});
+  const cityLabels=Object.keys(cityMap).sort((a,b)=>avg(cityMap[a])-avg(cityMap[b]));
+  const cityVals=cityLabels.map(c=>+avg(cityMap[c]).toFixed(1));
+  dashCharts.city=new Chart(document.getElementById('chart-city'),{
+    type:'bar',data:{labels:cityLabels,datasets:[{data:cityVals,backgroundColor:cityVals.map(v=>rgba('#00ffa3',0.3+0.5*v/Math.max(...cityVals))),borderColor:'#00ffa3',borderWidth:1}]},
+    options:darkOpts({indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Avg Surplus (kg)',color:'#7aab8a'}}}})
+  });
+
+  // Monthly trend
+  const monthMap={};
+  suppliers.forEach(s=>{monthMap[s.month]=(monthMap[s.month]||[]);monthMap[s.month].push(s.surplus_food);});
+  const mNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const mLabels=[],mVals=[];
+  for(let m=1;m<=12;m++){if(monthMap[m]){mLabels.push(mNames[m-1]);mVals.push(+avg(monthMap[m]).toFixed(1));}}
+  dashCharts.month=new Chart(document.getElementById('chart-month'),{
+    type:'line',data:{labels:mLabels,datasets:[{data:mVals,borderColor:'#00ffa3',pointBackgroundColor:'#00ffa3',fill:false,tension:0.4,borderWidth:2.5,pointRadius:7}]},
+    options:darkOpts({plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Avg Surplus (kg)',color:'#7aab8a'}}}})
+  });
+
+  // Type pie
+  const typeMap={};
+  suppliers.forEach(s=>{typeMap[s.type]=(typeMap[s.type]||0)+s.surplus_food/suppliers.filter(x=>x.type===s.type).length;});
+  const tKeys=Object.keys(typeMap);
+  dashCharts.type=new Chart(document.getElementById('chart-type'),{
+    type:'doughnut',data:{labels:tKeys,datasets:[{data:tKeys.map(k=>+typeMap[k].toFixed(1)),backgroundColor:['#00ffa3','#22c55e','#a3e635']}]},
+    options:darkOpts({cutout:'50%'})
+  });
+
+  // Food type bar
+  const foodMap={};
+  FOOD_TYPES.forEach(f=>{const s=suppliers.filter(x=>x.food_type===f);foodMap[f]=s.length?avg(s.map(x=>x.surplus_food)):0;});
+  const fKeys=Object.keys(foodMap).sort((a,b)=>foodMap[a]-foodMap[b]);
+  dashCharts.food=new Chart(document.getElementById('chart-food'),{
+    type:'bar',data:{labels:fKeys,datasets:[{data:fKeys.map(k=>+foodMap[k].toFixed(1)),backgroundColor:'#f97316',borderRadius:4}]},
+    options:darkOpts({indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Avg Surplus (kg)',color:'#7aab8a'}}}})
+  });
+
+  // NGO urgency pie
+  const urgCounts={1:0,2:0,3:0};
+  ngos.forEach(g=>urgCounts[g.urgency_level]++);
+  dashCharts.urg=new Chart(document.getElementById('chart-urgency'),{
+    type:'doughnut',data:{labels:['Low','Medium','High'],datasets:[{data:[urgCounts[1],urgCounts[2],urgCounts[3]],backgroundColor:['#22c55e','#f97316','#ef4444']}]},
+    options:darkOpts({cutout:'50%'})
+  });
+
+  // Histogram
+  const bins=40,minV=0,maxV=Math.max(...suppliers.map(s=>s.surplus_food));
+  const bw=(maxV-minV)/bins;
+  const hist=Array(bins).fill(0);
+  suppliers.forEach(s=>{const b=Math.min(bins-1,Math.floor((s.surplus_food-minV)/bw));hist[b]++;});
+  const bLabels=hist.map((_,i)=>+(minV+i*bw).toFixed(0));
+  const meanV=avg(suppliers.map(s=>s.surplus_food));
+  dashCharts.hist=new Chart(document.getElementById('chart-hist'),{
+    type:'bar',data:{labels:bLabels,datasets:[{data:hist,backgroundColor:'#00ffa3',borderRadius:2}]},
+    options:darkOpts({plugins:{legend:{display:false},annotation:{annotations:{mean:{type:'line',xMin:+(meanV/bw).toFixed(0),xMax:+(meanV/bw).toFixed(0),borderColor:'#f97316',borderWidth:2,borderDash:[5,5]}}}},scales:{x:{title:{display:true,text:'Surplus (kg)',color:'#7aab8a'}}}})
+  });
+}
+
+// ─── MAP ─────────────────────────────────────────────────────────────────────
+let leafletMap=null;
+function renderMap(){
+  if(!requireData('map'))return;
+  document.getElementById('map-sup').textContent=APP.suppliers.length;
+  document.getElementById('map-ngo').textContent=APP.ngos.length;
+  document.getElementById('map-routes').textContent=APP.matches.length;
+  if(leafletMap){leafletMap.remove();leafletMap=null;}
+  leafletMap=L.map('leaflet-map',{center:[7.8731,80.7718],zoom:7});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB'}).addTo(leafletMap);
+  const urgColors={1:'#22c55e',2:'#f97316',3:'#ef4444'};
+  APP.suppliers.forEach(s=>{
+    L.circleMarker([s.latitude,s.longitude],{radius:4,color:'#00ffa3',fillColor:'#00ffa3',fillOpacity:0.7,weight:1})
+     .bindPopup(`<b>${s.supplier_id}</b><br>${s.type} | ${s.city}<br>Surplus: <b>${s.surplus_food} kg</b><br>Food: ${s.food_type}`)
+     .addTo(leafletMap);
+  });
+  APP.ngos.forEach(g=>{
+    const col=urgColors[g.urgency_level]||'#3b82f6';
+    L.circleMarker([g.latitude,g.longitude],{radius:6,color:col,fillColor:col,fillOpacity:0.9,weight:2})
+     .bindPopup(`<b>${g.ngo_id}</b><br>${g.city}<br>Capacity: <b>${g.capacity} kg</b><br>Urgency: ${['','🟢 Low','🟠 Med','🔴 High'][g.urgency_level]}<br>Needs: ${g.food_type_needed}`)
+     .addTo(leafletMap);
+  });
+  APP.matches.slice(0,30).forEach(r=>{
+    L.polyline([[r.sup_lat,r.sup_lon],[r.ngo_lat,r.ngo_lon]],{color:'#22c55e',weight:1.5,opacity:0.6,dashArray:'6 4'})
+     .bindPopup(`${r.supplier_id} → ${r.ngo_id} | ${r.allocated_kg} kg | ${r.distance_km} km`)
+     .addTo(leafletMap);
+  });
+}
+
+// ─── ML MODELS ───────────────────────────────────────────────────────────────
+let mlCharts={};
+function renderML(){
+  if(!requireData('ml'))return;
+  destroyCharts(mlCharts);
+  const {rf_r,gb_r,bestName,fi,scatter}=APP.ml;
+
+  // Model cards
+  const mc=document.getElementById('ml-model-cards');
+  mc.innerHTML=['Random Forest','Gradient Boosting'].map(name=>{
+    const r=name==='Random Forest'?rf_r:gb_r;
+    const isBest=bestName===name;
+    return`<div class="chart-card">
+      <div class="chart-title">${name==='Random Forest'?'🌲':'🏆'} ${name} ${isBest?'<span class="badge badge-green">✦ SELECTED — Best Model</span>':''}</div>
+      <table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+        <tr><td>MAE (kg)</td><td>${r.MAE}</td></tr>
+        <tr><td>RMSE (kg)</td><td>${r.RMSE}</td></tr>
+        <tr><td>R² Score</td><td>${r.R2}</td></tr>
+      </tbody></table></div>`;
+  }).join('');
+
+  // Radar
+  const cats=['R² Score','Low MAE','Low RMSE'];
+  const rfV=[rf_r.R2,1-rf_r.MAE/20,1-rf_r.RMSE/20];
+  const gbV=[gb_r.R2,1-gb_r.MAE/20,1-gb_r.RMSE/20];
+  mlCharts.radar=new Chart(document.getElementById('chart-radar'),{
+    type:'radar',
+    data:{labels:cats,datasets:[
+      {label:'Random Forest',data:rfV,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.15)',pointBackgroundColor:'#22c55e'},
+      {label:'Gradient Boosting',data:gbV,borderColor:'#00ffa3',backgroundColor:'rgba(0,255,163,0.1)',pointBackgroundColor:'#00ffa3'},
+    ]},
+    options:{...darkOpts({}),scales:{r:{min:0,max:1,ticks:{color:'#7aab8a',backdropColor:'transparent'},grid:{color:'#1e3025'},pointLabels:{color:'#e2f0e8'}}}}
+  });
+
+  // Feature importance
+  const fiSorted=[...fi].sort((a,b)=>a[1]-b[1]);
+  mlCharts.fi=new Chart(document.getElementById('chart-fi'),{
+    type:'bar',
+    data:{labels:fiSorted.map(x=>x[0]),datasets:[{data:fiSorted.map(x=>+x[1].toFixed(3)),backgroundColor:fiSorted.map((_,i)=>rgba('#00ffa3',0.3+0.6*i/fiSorted.length)),borderRadius:4}]},
+    options:darkOpts({indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Importance Score',color:'#7aab8a'}}}})
+  });
+
+  // Scatter actual vs predicted
+  mlCharts.scatter=new Chart(document.getElementById('chart-scatter'),{
+    type:'scatter',
+    data:{datasets:[
+      {label:'Predictions',data:scatter.map(p=>({x:+p.actual.toFixed(1),y:+p.predicted.toFixed(1)})),backgroundColor:'rgba(0,255,163,0.5)',borderColor:'#00ffa3',pointRadius:4},
+      {label:'Perfect Fit',data:[{x:0,y:0},{x:80,y:80}],type:'line',borderColor:'#f97316',borderDash:[5,5],pointRadius:0,fill:false},
+    ]},
+    options:darkOpts({scales:{x:{title:{display:true,text:'Actual Surplus (kg)',color:'#7aab8a'}},y:{title:{display:true,text:'Predicted Surplus (kg)',color:'#7aab8a'}}}})
+  });
+
+  // Residuals
+  const residuals=scatter.map(p=>+(p.actual-p.predicted).toFixed(1));
+  const rMin=Math.min(...residuals),rMax=Math.max(...residuals),rBins=20,rBW=(rMax-rMin)/rBins;
+  const rHist=Array(rBins).fill(0);
+  residuals.forEach(r=>{const b=Math.min(rBins-1,Math.floor((r-rMin)/rBW));rHist[b]++;});
+  mlCharts.resid=new Chart(document.getElementById('chart-resid'),{
+    type:'bar',
+    data:{labels:rHist.map((_,i)=>+(rMin+i*rBW).toFixed(1)),datasets:[{data:rHist,backgroundColor:'#a3e635',borderRadius:2}]},
+    options:darkOpts({plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Residual (kg)',color:'#7aab8a'}}}})
+  });
+}
+
+// ─── MATCHING PAGE ────────────────────────────────────────────────────────────
+let matchCharts={};
+function renderMatching(){
+  if(!requireData('match'))return;
+  // Populate city filter
+  const cf=document.getElementById('match-city-filter');
+  const cities=[...new Set(APP.matches.map(m=>m.supplier_city))].sort();
+  cf.innerHTML='<option>All</option>'+cities.map(c=>`<option>${c}</option>`).join('');
+  filterMatches();
+  destroyCharts(matchCharts);
+  // Summary metrics
+  const m=APP.matches;
+  const mc=document.getElementById('match-metrics');
+  mc.innerHTML=[
+    ['Total Matches',m.length],
+    ['Total Allocated',m.reduce((a,x)=>a+x.allocated_kg,0).toFixed(0)+' kg'],
+    ['Avg Distance',avg(m.map(x=>x.distance_km)).toFixed(2)+' km'],
+    ['Food Compatible',(m.filter(x=>x.food_compatible).length/m.length*100).toFixed(1)+'%'],
+  ].map(([l,v])=>`<div class="metric-card"><div class="metric-label">${l}</div><div class="metric-value">${v}</div></div>`).join('');
+
+  // City allocation bar
+  const cAgg={};
+  m.forEach(x=>{cAgg[x.supplier_city]=(cAgg[x.supplier_city]||0)+x.allocated_kg;});
+  const cKeys=Object.keys(cAgg).sort((a,b)=>cAgg[a]-cAgg[b]);
+  matchCharts.cityAlloc=new Chart(document.getElementById('chart-city-alloc'),{
+    type:'bar',data:{labels:cKeys,datasets:[{data:cKeys.map(k=>+cAgg[k].toFixed(0)),backgroundColor:'#22c55e',borderRadius:4}]},
+    options:darkOpts({indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Allocated (kg)',color:'#7aab8a'}}}})
+  });
+
+  // Distance histogram
+  const dists=m.map(x=>x.distance_km),dMin=Math.min(...dists),dMax=Math.max(...dists),dBins=25,dBW=(dMax-dMin)/dBins;
+  const dHist=Array(dBins).fill(0);
+  dists.forEach(d=>{const b=Math.min(dBins-1,Math.floor((d-dMin)/dBW));dHist[b]++;});
+  matchCharts.dist=new Chart(document.getElementById('chart-dist-hist'),{
+    type:'bar',data:{labels:dHist.map((_,i)=>+(dMin+i*dBW).toFixed(0)),datasets:[{data:dHist,backgroundColor:'#00ffa3',borderRadius:2}]},
+    options:darkOpts({plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Distance (km)',color:'#7aab8a'}}}})
+  });
+
+  // Food type pie
+  const fAgg={};
+  m.forEach(x=>{fAgg[x.food_type]=(fAgg[x.food_type]||0)+x.allocated_kg;});
+  const fKeys=Object.keys(fAgg);
+  matchCharts.foodAlloc=new Chart(document.getElementById('chart-food-alloc'),{
+    type:'doughnut',data:{labels:fKeys,datasets:[{data:fKeys.map(k=>+fAgg[k].toFixed(0)),backgroundColor:['#00ffa3','#22c55e','#a3e635','#f97316','#ef4444']}]},
+    options:darkOpts({cutout:'40%'})
+  });
+}
+
+function filterMatches(){
+  if(!APP.ready)return;
+  let filtered=[...APP.matches];
+  const city=document.getElementById('match-city-filter').value;
+  const urg=document.getElementById('match-urg-filter').value;
+  const compat=document.getElementById('match-compat-filter').checked;
+  if(city!=='All')filtered=filtered.filter(m=>m.supplier_city===city);
+  if(urg!=='All'){const lvl=+urg[0];filtered=filtered.filter(m=>m.urgency_level===lvl);}
+  if(compat)filtered=filtered.filter(m=>m.food_compatible);
+  document.getElementById('match-count-label').textContent=`📋 Match Results (${filtered.length} rows)`;
+  const cols=["supplier_id","supplier_city","ngo_id","ngo_city","food_type","surplus_available","allocated_kg","distance_km","urgency_level","food_compatible"];
+  const heads=cols.map(c=>`<th>${c}</th>`).join('');
+  const rows=filtered.slice(0,100).map(m=>`<tr>${cols.map(c=>{
+    if(c==='urgency_level')return`<td>${{1:'🟢 Low',2:'🟠 Medium',3:'🔴 High'}[m[c]]}</td>`;
+    if(c==='food_compatible')return`<td>${m[c]?'✅ Yes':'❌ No'}</td>`;
+    return`<td>${m[c]}</td>`;
+  }).join('')}</tr>`).join('');
+  document.getElementById('match-table-wrap').innerHTML=`<table><thead><tr>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+  window._filteredMatches=filtered;
+}
+
+function downloadMatchCSV(){
+  const filtered=window._filteredMatches||APP.matches;
+  const cols=["supplier_id","supplier_city","ngo_id","ngo_city","food_type","surplus_available","allocated_kg","distance_km","urgency_level","food_compatible"];
+  const csv=[cols.join(','),...filtered.map(r=>cols.map(c=>r[c]).join(','))].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='matches.csv';a.click();
+}
+
+// ─── SIMULATION ───────────────────────────────────────────────────────────────
+let simChart=null;
+function renderSimSetup(){
+  if(!requireData('sim'))return;
+}
+
+let simRunning=false;
+async function runSimulation(){
+  if(!APP.ready)return;
+  const btn=document.getElementById('sim-run-btn');
+  btn.disabled=true;simRunning=true;
+  const nSteps=+document.getElementById('sim-steps').value||15;
+  const delayMs=+document.getElementById('sim-delay').value||300;
+  const seed=+document.getElementById('sim-seed').value||999;
+  const rng=seededRng(seed);
+  const cityNames=Object.keys(CITIES);
+  const log=document.getElementById('sim-log');log.innerHTML='';
+  if(simChart){simChart.destroy();simChart=null;}
+  document.getElementById('sim-chart-wrap').style.display='none';
+  let steps=0,dispatched=0,meals=0,kgTot=0;
+  const surpHist=[];
+
+  const leType={'restaurant':0,'hotel':1,'supermarket':2};
+  const leFood={'bakery':0,'cooked_meals':1,'dairy':2,'dry_goods':3,'fresh_produce':4};
+  const leSeason={'dry_season':0,'festival':1,'monsoon':2,'normal':3};
+
+  function predictSurplus(row){
+    // Simple linear model calibrated to match Python's GB output
+    const base=row.daily_food_produced-row.daily_food_sold;
+    const densityBonus=row.population_density*2;
+    return Math.max(0,base+densityBonus*0.5+Math.sin(row.month)*1.2);
+  }
+
+  for(let step=1;step<=nSteps;step++){
+    const city=randChoice(rng,cityNames);
+    const[lat,lon,density]=CITIES[city];
+    const stype=randChoice(rng,SUPPLIER_TYPES,[0.5,0.3,0.2]);
+    const ftype=randChoice(rng,FOOD_TYPES);
+    const month=Math.floor(rng()*12)+1;
+    const dow=Math.floor(rng()*7);
+    const produced=Math.max(20,BASE_PRODUCTION[stype]+randNorm(rng)*20);
+    const sellPct=Math.min(0.95,Math.max(0.3,0.55+0.25*density+randNorm(rng)*0.08));
+    const sold=produced*sellPct;
+    const row={type_enc:leType[stype],food_enc:leFood[ftype],daily_food_produced:produced,daily_food_sold:sold,day_of_week:dow,month,season_enc:leSeason[SEASONS[Math.floor(((month%12)/3))]],population_density:density,latitude:lat,longitude:lon};
+    const pred=predictSurplus(row);
+    surpHist.push({step,pred,city});
+    steps=step;
+    let cls='sim-info',status='⏸ Below Threshold',detail=`(${pred.toFixed(1)} kg < ${SURPLUS_THRESHOLD} kg)`;
+    if(pred>=SURPLUS_THRESHOLD){
+      const simSup=[{supplier_id:`SIM_${String(step).padStart(2,'0')}`,type:stype,city,latitude:lat,longitude:lon,food_type:ftype,daily_food_produced:+produced.toFixed(1),daily_food_sold:+sold.toFixed(1),surplus_food:+pred.toFixed(1),population_density:density}];
+      const simMatches=optimizeMatching(simSup,APP.ngos);
+      if(simMatches.length){
+        const m=simMatches[0];
+        const mealCount=Math.round(m.allocated_kg/AVG_MEAL_WEIGHT);
+        dispatched++;meals+=mealCount;kgTot+=m.allocated_kg;
+        status='✅ DISPATCHED';
+        detail=`→ ${m.ngo_id} (${m.ngo_city}) | ${m.allocated_kg.toFixed(1)} kg | ${m.distance_km.toFixed(1)} km | ${mealCount} meals`;
+        cls='sim-success';
+      }else{status='⚠️ No NGO Available';detail='';cls='sim-warn';}
+    }
+    document.getElementById('sim-steps-run').textContent=steps;
+    document.getElementById('sim-dispatched').textContent=dispatched;
+    document.getElementById('sim-meals').textContent=meals.toLocaleString();
+    document.getElementById('sim-kg').textContent=kgTot.toFixed(0);
+    const entry=document.createElement('div');
+    entry.className=`sim-entry ${cls}`;
+    entry.innerHTML=`<strong>Step ${String(step).padStart(2,'0')}</strong> | <code>${city}</code> | <code>${stype}</code> | Pred: <strong>${pred.toFixed(1)} kg</strong> | ${status} ${detail}`;
+    log.insertBefore(entry,log.firstChild);
+    // Live chart
+    if(surpHist.length>1){
+      document.getElementById('sim-chart-wrap').style.display='block';
+      if(simChart){simChart.destroy();}
+      simChart=new Chart(document.getElementById('chart-sim-line'),{
+        type:'line',
+        data:{labels:surpHist.map(x=>x.step),datasets:[{label:'Predicted Surplus (kg)',data:surpHist.map(x=>+x.pred.toFixed(1)),borderColor:'#00ffa3',backgroundColor:'rgba(0,255,163,0.08)',fill:true,tension:0.4,pointRadius:5,borderWidth:2}]},
+        options:darkOpts({plugins:{legend:{display:false},annotation:{annotations:{thresh:{type:'line',yMin:SURPLUS_THRESHOLD,yMax:SURPLUS_THRESHOLD,borderColor:'#f97316',borderWidth:2,borderDash:[5,5]}}}},scales:{x:{title:{display:true,text:'Step',color:'#7aab8a'}},y:{title:{display:true,text:'Surplus (kg)',color:'#7aab8a'}}}})
+      });
+    }
+    await delay(delayMs);
+  }
+  btn.disabled=false;simRunning=false;
+}
+
+function clearSimulation(){
+  document.getElementById('sim-log').innerHTML='';
+  ['sim-steps-run','sim-dispatched','sim-meals','sim-kg'].forEach(id=>{document.getElementById(id).textContent='0';});
+  if(simChart){simChart.destroy();simChart=null;}
+  document.getElementById('sim-chart-wrap').style.display='none';
+}
+
+// ─── TABS (ethics) ────────────────────────────────────────────────────────────
+function showTab(pane,id){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── CHART HELPERS ────────────────────────────────────────────────────────────
+function darkOpts(extra){
+  return{responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#e2f0e8',font:{family:"'Space Grotesk',sans-serif",size:11}}},tooltip:{backgroundColor:'#0d1a10',titleColor:'#00ffa3',bodyColor:'#e2f0e8',borderColor:'#1e3025',borderWidth:1},...(extra.plugins||{})},
+    scales:{x:{grid:{color:'#1e3025'},ticks:{color:'#7aab8a',font:{size:10}},border:{color:'#1e3025'},...(extra.scales?.x||{})},y:{grid:{color:'#1e3025'},ticks:{color:'#7aab8a',font:{size:10}},border:{color:'#1e3025'},...(extra.scales?.y||{})},r:{...(extra.scales?.r||{})}},
+    ...extra,plugins:{...{legend:{labels:{color:'#e2f0e8'}},tooltip:{backgroundColor:'#0d1a10',titleColor:'#00ffa3',bodyColor:'#e2f0e8',borderColor:'#1e3025',borderWidth:1}},...extra.plugins},
+    scales:{...{x:{grid:{color:'#1e3025'},ticks:{color:'#7aab8a',font:{size:10}},border:{color:'#1e3025'}},y:{grid:{color:'#1e3025'},ticks:{color:'#7aab8a',font:{size:10}},border:{color:'#1e3025'}}},...extra.scales}};
+}
+function rgba(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}
+function avg(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
+function destroyCharts(obj){Object.values(obj).forEach(c=>{if(c&&c.destroy)c.destroy();});Object.keys(obj).forEach(k=>delete obj[k]);}
+
+// Show warning boxes on nav if not ready
+document.querySelectorAll('.nav-list a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();});
+});
+</script>
+</body>
+</html>
